@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
 using StageFlowVag.Application.Interfaces;
-using StageFlowVag.Communication.Requests;
 using StageFlowVag.Communication.Requests.Solicitacoes;
-using StageFlowVag.Communication.Responses;
 using StageFlowVag.Communication.Responses.Solicitacoes;
 using StageFlowVag.Domain.Entities.AtendimentosDepartamentos;
 using StageFlowVag.Domain.Entities.Solicitacoes;
@@ -67,7 +65,7 @@ namespace StageFlowVag.Application.Services
             _solicitacaoRepository.Update(solicitacao);
             await _solicitacaoRepository.SaveChangesAsync();
 
-            // ✅ Se aprovada, criar automaticamente os atendimentos
+            // Se aprovada → criar automaticamente os atendimentos
             if (request.Aprovar)
             {
                 var departamentos = await IdentificarDepartamentosPorInsumos(solicitacao.Id);
