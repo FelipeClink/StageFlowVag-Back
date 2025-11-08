@@ -10,4 +10,10 @@
     <ProjectReference Include="..\StageFlowVag.Communication\StageFlowVag.Communication.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Middleware\" />
+    <Folder Include="Custom\" />
+    <Folder Include="Models\" />
+  </ItemGroup>
+
 </Project>

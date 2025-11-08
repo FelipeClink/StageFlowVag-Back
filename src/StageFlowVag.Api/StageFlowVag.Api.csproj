@@ -19,4 +19,10 @@
     <ProjectReference Include="..\StageFlowVag.Repository\StageFlowVag.Repository.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Configurations\" />
+    <Folder Include="Controllers\" />
+    <Folder Include="Middlewares\" />
+  </ItemGroup>
+
 </Project>

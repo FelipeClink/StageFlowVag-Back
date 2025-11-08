@@ -19,4 +19,11 @@
     <ProjectReference Include="..\StageFlowVag.Domain\StageFlowVag.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+    <Folder Include="Configurations\" />
+    <Folder Include="StageFlowVagDbContext\" />
+    <Folder Include="Repositories\" />
+  </ItemGroup>
+
 </Project>
