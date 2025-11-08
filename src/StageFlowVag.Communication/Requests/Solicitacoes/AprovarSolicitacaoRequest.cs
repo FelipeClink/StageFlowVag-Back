@@ -6,4 +6,11 @@
         public int ViceReitorId { get; set; }
         public string? JustificativaRejeicao { get; set; }
     }
+
+    public class VerificarConflitoRequest
+    {
+        public int BlocoId { get; set; }
+        public DateTime DataHoraInicio { get; set; }
+        public DateTime DataHoraFim { get; set; }
+    }
 }

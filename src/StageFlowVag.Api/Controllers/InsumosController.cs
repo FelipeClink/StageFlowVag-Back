@@ -23,9 +23,10 @@ namespace StageFlowVag.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ObterTodos()
+        public async Task<IActionResult> ObterTodos([FromQuery] int? departamento)
         {
-            var response = await _insumoService.ObterTodosAsync();
+            // Agora passamos o parâmetro (que pode ser nulo) para o serviço
+            var response = await _insumoService.ObterTodosAsync(departamento);
             return Ok(response);
         }
 

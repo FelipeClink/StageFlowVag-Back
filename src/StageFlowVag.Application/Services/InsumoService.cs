@@ -31,11 +31,28 @@ namespace StageFlowVag.Application.Services
             return _mapper.Map<InsumoResponse>(entity);
         }
 
-        public async Task<IEnumerable<InsumoResponse>> ObterTodosAsync()
+
+        public async Task<IEnumerable<InsumoResponse>> ObterTodosAsync(int? departamento)
         {
-            var insumos = await _repository.GetAllAsync();
+            IEnumerable<Insumo> insumos;
+
+            if (departamento.HasValue)
+            {
+
+                insumos = await _repository.GetByDepartamentoAsync((DepartamentoEnum)departamento.Value);
+            }
+            else
+            {
+
+                insumos = await _repository.GetAllAsync();
+            }
+
+            // 3. Mapeamos o resultado, não importa qual caminho foi usado
             return _mapper.Map<IEnumerable<InsumoResponse>>(insumos);
         }
+        // 
+        // --- FIM DA CORREÇÃO ---
+        // 
 
         public async Task<InsumoResponse?> ObterPorIdAsync(int id)
         {
@@ -43,10 +60,13 @@ namespace StageFlowVag.Application.Services
             return _mapper.Map<InsumoResponse>(insumo);
         }
 
+        
         public async Task<IEnumerable<InsumoResponse>> ObterPorDepartamentoAsync(int departamento)
         {
             var insumos = await _repository.GetByDepartamentoAsync((DepartamentoEnum)departamento);
             return _mapper.Map<IEnumerable<InsumoResponse>>(insumos);
         }
+        
+        
     }
 }

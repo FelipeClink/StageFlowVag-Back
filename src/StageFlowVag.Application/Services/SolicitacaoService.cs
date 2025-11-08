@@ -7,98 +7,117 @@ using StageFlowVag.Domain.Entities.Solicitacoes;
 using StageFlowVag.Domain.Enums;
 using StageFlowVag.Domain.Interfaces;
 
-namespace StageFlowVag.Application.Services
+public class SolicitacaoService : ISolicitacaoService
 {
-    public class SolicitacaoService : ISolicitacaoService
+    private readonly ISolicitacaoRepository _solicitacaoRepository;
+    private readonly IAtendimentoDepartamentoRepository _atendimentoRepository;
+    private readonly IInsumoRepository _insumoRepository;
+    private readonly IMapper _mapper;
+
+    public SolicitacaoService(
+        ISolicitacaoRepository solicitacaoRepository,
+        IAtendimentoDepartamentoRepository atendimentoRepository,
+        IInsumoRepository insumoRepository,
+        IMapper mapper)
     {
-        private readonly ISolicitacaoRepository _solicitacaoRepository;
-        private readonly IAtendimentoDepartamentoRepository _atendimentoRepository;
-        private readonly IInsumoRepository _insumoRepository;
-        private readonly IMapper _mapper;
+        _solicitacaoRepository = solicitacaoRepository;
+        _atendimentoRepository = atendimentoRepository;
+        _insumoRepository = insumoRepository;
+        _mapper = mapper;
+    }
 
-        public SolicitacaoService(
-            ISolicitacaoRepository solicitacaoRepository,
-            IAtendimentoDepartamentoRepository atendimentoRepository,
-            IInsumoRepository insumoRepository,
-            IMapper mapper)
+    public async Task<SolicitacaoResponse> CriarSolicitacaoAsync(SolicitacaoRequest request)
+    {
+        var solicitacao = _mapper.Map<Solicitacao>(request);
+        solicitacao.CriadoEm = DateTime.UtcNow;
+        solicitacao.IsActive = true;
+
+        // ⚠️ Validar conflito de horário
+        var existeConflito = await _solicitacaoRepository.VerificarConflitoDeHorarioAsync(request.BlocoId, request.DataHoraInicio, request.DataHoraFim);
+
+        if (existeConflito)
+            throw new Exception("Já existe um evento aprovado neste bloco neste horário.");
+
+        await _solicitacaoRepository.AddAsync(solicitacao);
+        await _solicitacaoRepository.SaveChangesAsync();
+
+        return _mapper.Map<SolicitacaoResponse>(solicitacao);
+    }
+
+    public async Task<SolicitacaoResponse?> ObterPorIdAsync(int id)
+    {
+        var solicitacao = await _solicitacaoRepository.GetDetalhadaAsync(id);
+        return solicitacao is null ? null : _mapper.Map<SolicitacaoResponse>(solicitacao);
+    }
+
+    public async Task<IEnumerable<SolicitacaoResponse>> ObterTodasAsync()
+    {
+        var solicitacoes = await _solicitacaoRepository.GetAllAsync();
+        return _mapper.Map<IEnumerable<SolicitacaoResponse>>(solicitacoes);
+    }
+
+    public async Task<SolicitacaoResponse> AprovarSolicitacaoAsync(int id, AprovarSolicitacaoRequest request)
+    {
+        var solicitacao = await _solicitacaoRepository.GetByIdAsync(id)
+            ?? throw new Exception("Solicitação não encontrada.");
+
+        solicitacao.Aprovado = request.Aprovar;
+        solicitacao.DataAprovacao = DateTime.UtcNow;
+        solicitacao.AprovadoPorId = request.ViceReitorId;
+        solicitacao.JustificativaRejeicao = request.JustificativaRejeicao;
+
+        _solicitacaoRepository.Update(solicitacao);
+        await _solicitacaoRepository.SaveChangesAsync();
+
+        // Se aprovada → criar automaticamente os atendimentos
+        if (request.Aprovar)
         {
-            _solicitacaoRepository = solicitacaoRepository;
-            _atendimentoRepository = atendimentoRepository;
-            _insumoRepository = insumoRepository;
-            _mapper = mapper;
-        }
-
-        public async Task<SolicitacaoResponse> CriarSolicitacaoAsync(SolicitacaoRequest request)
-        {
-            var solicitacao = _mapper.Map<Solicitacao>(request);
-            solicitacao.CriadoEm = DateTime.UtcNow;
-            solicitacao.IsActive = true;
-
-            await _solicitacaoRepository.AddAsync(solicitacao);
-            await _solicitacaoRepository.SaveChangesAsync();
-
-            return _mapper.Map<SolicitacaoResponse>(solicitacao);
-        }
-
-        public async Task<SolicitacaoResponse?> ObterPorIdAsync(int id)
-        {
-            var solicitacao = await _solicitacaoRepository.GetDetalhadaAsync(id);
-            return solicitacao is null ? null : _mapper.Map<SolicitacaoResponse>(solicitacao);
-        }
-
-        public async Task<IEnumerable<SolicitacaoResponse>> ObterTodasAsync()
-        {
-            var solicitacoes = await _solicitacaoRepository.GetAllAsync();
-            return _mapper.Map<IEnumerable<SolicitacaoResponse>>(solicitacoes);
-        }
-
-        public async Task<SolicitacaoResponse> AprovarSolicitacaoAsync(int id, AprovarSolicitacaoRequest request)
-        {
-            var solicitacao = await _solicitacaoRepository.GetByIdAsync(id)
-                ?? throw new Exception("Solicitação não encontrada.");
-
-            solicitacao.Aprovado = request.Aprovar;
-            solicitacao.DataAprovacao = DateTime.UtcNow;
-            solicitacao.AprovadoPorId = request.ViceReitorId;
-            solicitacao.JustificativaRejeicao = request.JustificativaRejeicao;
-
-            _solicitacaoRepository.Update(solicitacao);
-            await _solicitacaoRepository.SaveChangesAsync();
-
-            // Se aprovada → criar automaticamente os atendimentos
-            if (request.Aprovar)
+            var departamentos = await IdentificarDepartamentosPorInsumos(solicitacao.Id);
+            foreach (var dept in departamentos.Distinct())
             {
-                var departamentos = await IdentificarDepartamentosPorInsumos(solicitacao.Id);
-                foreach (var dept in departamentos.Distinct())
+                var atendimento = new AtendimentoDepartamento
                 {
-                    var atendimento = new AtendimentoDepartamento
-                    {
-                        SolicitacaoId = solicitacao.Id,
-                        Departamento = dept,
-                        Status = StatusAtendimentoEnum.Pendente,
-                        CriadoEm = DateTime.UtcNow,
-                        IsActive = true
-                    };
+                    SolicitacaoId = solicitacao.Id,
+                    Departamento = dept,
+                    Status = StatusAtendimentoEnum.Pendente,
+                    CriadoEm = DateTime.UtcNow,
+                    IsActive = true
+                };
 
-                    await _atendimentoRepository.AddAsync(atendimento);
-                }
-
-                await _atendimentoRepository.SaveChangesAsync();
+                await _atendimentoRepository.AddAsync(atendimento);
             }
 
-            return _mapper.Map<SolicitacaoResponse>(solicitacao);
+            await _atendimentoRepository.SaveChangesAsync();
         }
 
-        private async Task<IEnumerable<DepartamentoEnum>> IdentificarDepartamentosPorInsumos(int solicitacaoId)
-        {
-            var solicitacao = await _solicitacaoRepository.GetDetalhadaAsync(solicitacaoId);
-            if (solicitacao == null)
-                return Enumerable.Empty<DepartamentoEnum>();
+        return _mapper.Map<SolicitacaoResponse>(solicitacao);
+    }
 
-            var insumosIds = solicitacao.Insumos.Select(x => x.InsumoId).ToList();
-            var insumos = await _insumoRepository.FindAsync(i => insumosIds.Contains(i.Id));
+    private async Task<IEnumerable<DepartamentoEnum>> IdentificarDepartamentosPorInsumos(int solicitacaoId)
+    {
+        var solicitacao = await _solicitacaoRepository.GetDetalhadaAsync(solicitacaoId);
+        if (solicitacao == null)
+            return Enumerable.Empty<DepartamentoEnum>();
 
-            return insumos.Select(i => i.Departamento);
-        }
+        var insumosIds = solicitacao.Insumos.Select(x => x.InsumoId).ToList();
+        var insumos = await _insumoRepository.FindAsync(i => insumosIds.Contains(i.Id));
+
+        return insumos.Select(i => i.Departamento);
+    }
+
+    public async Task<IEnumerable<DateTime>> ObterDatasReservadasAsync(int blocoId)
+    {
+        return await _solicitacaoRepository.ObterDatasReservadasAsync(blocoId);
+    }
+
+    public async Task<IEnumerable<(DateTime Inicio, DateTime Fim)>> ObterHorariosReservadosAsync(int blocoId)
+    {
+        return await _solicitacaoRepository.ObterHorariosReservadosAsync(blocoId);
+    }
+
+    // Implementação do método VerificarConflitoDeHorarioAsync
+    public async Task<bool> VerificarConflitoDeHorarioAsync(int? blocoId, DateTime dataHoraInicio, DateTime dataHoraFim)
+    {
+        return await _solicitacaoRepository.VerificarConflitoDeHorarioAsync(blocoId, dataHoraInicio, dataHoraFim);
     }
 }

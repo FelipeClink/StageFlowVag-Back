@@ -37,6 +37,18 @@ builder.Services.AddScoped<IInsumoService, InsumoService>();
 builder.Services.AddScoped<IBlocoService, BlocoService>();
 builder.Services.AddScoped<IAtendimentoDepartamentoService, AtendimentoDepartamentoService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
+
+
 var app = builder.Build();
 
 // Configuração Swagger
@@ -47,6 +59,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 app.UseAuthorization();
 app.MapControllers();
 

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StageFlowVag.Repository;
@@ -11,9 +12,11 @@ using StageFlowVag.Repository;
 namespace StageFlowVag.Repository.Migrations
 {
     [DbContext(typeof(StageFlowVagDbContext))]
-    partial class StageFlowVagDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251108084258_novos_campos_solicitacao")]
+    partial class novos_campos_solicitacao
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

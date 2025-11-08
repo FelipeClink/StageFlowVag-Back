@@ -45,5 +45,27 @@ namespace StageFlowVag.Api.Controllers
             var response = await _solicitacaoService.AprovarSolicitacaoAsync(id, request);
             return Ok(response);
         }
+
+        [HttpGet("datas-reservadas/{blocoId}")]
+        public async Task<IActionResult> ObterDatasReservadas(int blocoId)
+        {
+            var datas = await _solicitacaoService.ObterDatasReservadasAsync(blocoId);
+            return Ok(datas);
+        }
+        [HttpGet("horarios-reservados/{blocoId}")]
+        public async Task<IActionResult> ObterHorariosReservados(int blocoId)
+        {
+            var horarios = await _solicitacaoService.ObterHorariosReservadosAsync(blocoId);
+            return Ok(horarios);
+        }
+        [HttpPost("verificar-conflito")]
+        public async Task<IActionResult> VerificarConflitoDeHorario([FromBody] VerificarConflitoRequest request)
+        {
+            var existeConflito = await _solicitacaoService.VerificarConflitoDeHorarioAsync(
+                request.BlocoId, request.DataHoraInicio, request.DataHoraFim
+            );
+
+            return Ok(new { sucesso = !existeConflito });
+        }
     }
 }

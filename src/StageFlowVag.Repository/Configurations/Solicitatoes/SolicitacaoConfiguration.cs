@@ -15,6 +15,9 @@ namespace StageFlowVag.Repository.Configurations.Solicitatoes
             builder.Property(s => s.NomeEvento).HasColumnName("nome_evento").IsRequired().HasMaxLength(200);
             builder.Property(s => s.Descricao).HasColumnName("descricao").HasMaxLength(1000);
             builder.Property(s => s.DataEvento).HasColumnName("data_evento").IsRequired();
+            builder.Property(s => s.DataHoraInicio).HasColumnName("data_hora_inicio").IsRequired();
+            builder.Property(s => s.DataHoraFim).HasColumnName("data_hora_fim").IsRequired();
+
             builder.Property(s => s.Local).HasColumnName("local").IsRequired().HasMaxLength(200);
             builder.Property(s => s.PublicoEstimado).HasColumnName("publico_estimado").IsRequired();
 
@@ -23,7 +26,9 @@ namespace StageFlowVag.Repository.Configurations.Solicitatoes
             builder.Property(s => s.AprovadoPorId).HasColumnName("aprovado_por_id");
             builder.Property(s => s.JustificativaRejeicao).HasColumnName("justificativa_rejeicao").HasMaxLength(500);
 
+
             builder.Property(s => s.SolicitanteId).HasColumnName("solicitante_id").IsRequired();
+            builder.Property(s => s.NomeSolicitante).HasColumnName("nomeSocilitante");
             builder.Property(s => s.BlocoId).HasColumnName("bloco_id");
 
             // BaseEntity
