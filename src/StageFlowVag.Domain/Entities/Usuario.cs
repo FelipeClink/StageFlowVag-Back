@@ -5,10 +5,11 @@ namespace StageFlowVag.Domain.Entities
 {
     public class Usuario : BaseEntity
     {
-        public string Matricula { get; set; }
-        public string Nome { get; set; } 
-        public string Senha { get; set; }
-        public string Email { get; set; }
+        public string Matricula { get; set; } = string.Empty;
+        public string CodigoFuncionario { get; set; } = string.Empty;
+        public string Nome { get; set; } = string.Empty;
+        public string Senha { get; set; } = string.Empty; 
+        public string Email { get; set; } = string.Empty;
         public UsuarioEnum Role { get; set; }
     }
 }
