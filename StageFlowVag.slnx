@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/StageFlowVag.Api/StageFlowVag.Api.csproj" />
+    <Project Path="src/StageFlowVag.Application/StageFlowVag.Application.csproj" />
+    <Project Path="src/StageFlowVag.Communication/StageFlowVag.Communication.csproj" />
+    <Project Path="src/StageFlowVag.Domain/StageFlowVag.Domain.csproj" />
+    <Project Path="src/StageFlowVag.Exception/StageFlowVag.Exception.csproj" />
+    <Project Path="src/StageFlowVag.Repository/StageFlowVag.Repository.csproj" />
+  </Folder>
+  <Folder Name="/test/" />
+</Solution>
