@@ -12,4 +12,11 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\StageFlowVag.Application\StageFlowVag.Application.csproj" />
+    <ProjectReference Include="..\StageFlowVag.Communication\StageFlowVag.Communication.csproj" />
+    <ProjectReference Include="..\StageFlowVag.Exception\StageFlowVag.Exception.csproj" />
+    <ProjectReference Include="..\StageFlowVag.Repository\StageFlowVag.Repository.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -11,4 +11,10 @@
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\StageFlowVag.Communication\StageFlowVag.Communication.csproj" />
+    <ProjectReference Include="..\StageFlowVag.Domain\StageFlowVag.Domain.csproj" />
+    <ProjectReference Include="..\StageFlowVag.Exception\StageFlowVag.Exception.csproj" />
+  </ItemGroup>
+
 </Project>
